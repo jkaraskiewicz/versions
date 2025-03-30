@@ -9,7 +9,10 @@ use crate::{
 };
 
 pub fn initialize_repository_filesystem(repository: &Repository) -> Result<(), VersionsError> {
-    let repository_dir_path = repository.root_path.join(constants::REPOSITORY_DIR);
+    let repository_dir_path = repository
+        .root_path
+        .join(constants::REPOSITORY_DIR)
+        .join(constants::OBJECTS_DIR);
     fs::create_dir_all(repository_dir_path)?;
     write_modules_config(
         repository,

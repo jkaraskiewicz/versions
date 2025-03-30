@@ -4,10 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-commons = { git = "ssh://git@github.com/jkaraskiewicz/commons.git", version = "0.1.4" }
+commons = { git = "ssh://git@github.com/jkaraskiewicz/commons.git", version = "0.1.5" }
 clap = { version = "4.5.29", features = ["derive", "string"] }
 serde = { version = "1.0.217", features = ["derive"] }
+clap_complete = "4.5.47"
 anyhow = "1.0.95"
 toml = "0.8.20"
 thiserror = "2.0.12"
-git2 = "0.19.0"
+flate2 = "1.1.0"
+walkdir = "2.5.0"
+colored = "3.0.0"
+serde_yml = "0.0.12"

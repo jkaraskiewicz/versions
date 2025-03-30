@@ -1,20 +1,22 @@
 use common::errors::VersionsError;
 use handlers::repository_handler;
-use std::path::PathBuf;
+use std::path::Path;
+pub use types::cli;
+pub use types::local;
 use types::repository::Repository;
 
 mod common;
 mod handlers;
 mod types;
 
-pub fn init(path: &PathBuf) -> Result<Repository, VersionsError> {
+pub fn init<P: AsRef<Path>>(path: P) -> Result<Repository, VersionsError> {
     repository_handler::init(path)
 }
 
-pub fn open(path: &PathBuf) -> Result<Repository, VersionsError> {
+pub fn open<P: AsRef<Path>>(path: P) -> Result<Repository, VersionsError> {
     repository_handler::open(path)
 }
 
-pub fn exists(path: &PathBuf) -> bool {
+pub fn exists<P: AsRef<Path>>(path: P) -> bool {
     repository_handler::exists(path)
 }

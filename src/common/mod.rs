@@ -1,4 +1,6 @@
 pub mod constants;
 pub mod errors;
-pub mod git_util;
-pub mod message_util;
+pub mod flate_util;
+pub mod module_util;
+pub mod repository_util;
+pub mod stream_util;

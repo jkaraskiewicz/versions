@@ -1,14 +1,12 @@
+use super::{
+    meta::{ModulePtr, RepositoryPtr},
+    module::Module,
+    repository::Repository,
+    version::Version,
+};
+use crate::common::{constants, errors::VersionsError};
 use commons::utils::file_util::{read_file, write_file};
 use serde::{Deserialize, Serialize};
-
-use crate::common::{
-    constants,
-    errors::VersionsError,
-    git_util::{add_all, commit, force_get_repository},
-    message_util::generate_update_message,
-};
-
-use super::{module::Module, repository::Repository};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ModulesConfig {
@@ -22,7 +20,8 @@ pub fn read_modules_config(repository: &Repository) -> Result<ModulesConfig, Ver
         .join(constants::MODULES_FILE);
     let content = read_file(&path).map_err(|_| VersionsError::RepositoryNotInitialized)?;
     let config: ModulesConfig =
-        toml::from_str(&content).map_err(|_| VersionsError::RepositoryNotInitialized)?;
+        serde_yml::from_str(&content).map_err(|_| VersionsError::RepositoryNotInitialized)?;
+    let config = append_metadata_to_config(repository, &config)?;
     Ok(config)
 }
 
@@ -34,12 +33,8 @@ pub fn write_modules_config(
         .root_path
         .join(constants::REPOSITORY_DIR)
         .join(constants::MODULES_FILE);
-    let content = toml::to_string(config)?;
+    let content = serde_yml::to_string(config)?;
     write_file(&path, &content)?;
-
-    let repo = force_get_repository(&repository.root_path)?;
-    add_all(&repo)?;
-    commit(&repo, &generate_update_message())?;
     Ok(())
 }
 
@@ -48,7 +43,59 @@ pub fn update_modules_config(
     mut updater: impl FnMut(ModulesConfig) -> ModulesConfig,
 ) -> Result<ModulesConfig, VersionsError> {
     let config = read_modules_config(repository)?;
+
     let result = updater(config);
+
     write_modules_config(repository, &result)?;
     Ok(result)
+}
+
+pub fn update_module_in_config(
+    repository: &Repository,
+    module: &Module,
+) -> Result<ModulesConfig, VersionsError> {
+    let mut config = read_modules_config(repository)?;
+    let mut modules = config.modules.to_vec();
+    modules.retain(|m| m.name != module.name);
+
+    modules.push(module.to_owned());
+    config.modules = modules;
+
+    write_modules_config(repository, &config)?;
+    Ok(config)
+}
+
+fn append_metadata_to_config(
+    repository: &Repository,
+    config: &ModulesConfig,
+) -> Result<ModulesConfig, VersionsError> {
+    let modules: Vec<Module> = config
+        .modules
+        .iter()
+        .map(|module| Module {
+            repository_ptr: RepositoryPtr::create(repository),
+            current_version: Version {
+                name: module.current_version.name.to_string(),
+                module: ModulePtr {
+                    repository_path: repository.root_path.to_path_buf(),
+                    module_name: module.name.to_string(),
+                    module_dir: module.directory.to_string(),
+                },
+            },
+            versions: module
+                .versions
+                .iter()
+                .map(|version| Version {
+                    name: version.name.to_string(),
+                    module: ModulePtr {
+                        repository_path: repository.root_path.to_path_buf(),
+                        module_name: module.name.to_string(),
+                        module_dir: module.directory.to_string(),
+                    },
+                })
+                .collect(),
+            ..module.to_owned()
+        })
+        .collect();
+    Ok(ModulesConfig { modules })
 }
