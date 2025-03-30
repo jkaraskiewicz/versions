@@ -84,4 +84,6 @@ pub enum VersionCommand {
     List,
     /// Current version
     Current,
+    /// Workspace status
+    Status,
 }

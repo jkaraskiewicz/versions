@@ -135,6 +135,13 @@ fn process_version_command(
             let version_name = repository.get_module(&module_name)?.current_version.name;
             Ok(format!("{}", version_name.bold().underline()))
         }
+        VersionCommand::Status => {
+            let status = repository
+                .get_module(&module_name)?
+                .current_version
+                .status()?;
+            Ok(status.unwrap_or("Workspace clean.".to_string()))
+        }
         VersionCommand::List => {
             let version_name = repository.get_module(&module_name)?.current_version.name;
             let versions: Vec<String> = repository
@@ -145,7 +152,7 @@ fn process_version_command(
                     if version.name == version_name {
                         format!("{}", version.name.bold().underline())
                     } else {
-                        format!("{}", version.name)
+                        version.name.to_string()
                     }
                 })
                 .collect();
