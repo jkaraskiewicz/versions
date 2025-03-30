@@ -40,8 +40,8 @@ pub enum ModuleCommand {
         #[arg()]
         name: String,
         /// Path to the directory
-        #[arg()]
-        path: PathBuf,
+        #[arg(default_value=None)]
+        path: Option<PathBuf>,
     },
     /// Remove module
     Remove {

@@ -1,7 +1,7 @@
 use std::{env, str::from_utf8};
 
 use clap::{CommandFactory, Parser};
-use clap_complete::{generate, Generator, Shell};
+use clap_complete::{generate, Shell};
 use colored::Colorize;
 use thiserror::Error;
 use versions::{
@@ -38,21 +38,15 @@ fn process() -> Result<String, Box<dyn std::error::Error>> {
             version_command,
         } => process_version_command(&name, &version_command),
         Command::Completions => {
-            let arg_matches = Cli::command().get_matches();
-            if let Some(generator) = arg_matches.get_one::<Shell>("generator").copied() {
-                let mut cmd = Cli::command();
-                Ok(generate_completions(generator, &mut cmd))
-            } else {
-                Ok("Couldn't generate shell completions.".to_string())
-            }
+            let mut buf = Vec::new();
+            generate(current_shell(), &mut Cli::command(), "versions", &mut buf);
+            Ok(from_utf8(buf.as_slice()).unwrap().to_string())
         }
     }
 }
 
-fn generate_completions<G: Generator>(generator: G, cmd: &mut clap::Command) -> String {
-    let mut buf = Vec::new();
-    generate(generator, cmd, cmd.get_name().to_string(), &mut buf);
-    from_utf8(buf.as_slice()).unwrap().to_string()
+fn current_shell() -> Shell {
+    clap_complete::Shell::from_env().unwrap_or(Shell::Zsh)
 }
 
 fn process_module_command(
@@ -64,23 +58,34 @@ fn process_module_command(
         return Err(VersionsCliError::CliError("Repository not initialized".to_string()).into());
     };
 
-    let repository = open(current_dir)?;
+    let repository = open(&current_dir)?;
 
     match module_command {
         ModuleCommand::New { name, path } => {
+            let path = path.to_owned().unwrap_or(current_dir.join(name));
             let _ = repository.add_module(name, path)?;
-            Ok(format!("Module {} added.", name.bold()))
+            Ok(format!("Module {} added.", name.bold().underline()))
         }
         ModuleCommand::Remove { name } => {
             let module = repository.get_module(name)?;
             repository.remove_module(&module)?;
-            Ok(format!("Module {} removed.", name.bold()))
+            Ok(format!("Module {} removed.", name.bold().underline()))
         }
         ModuleCommand::List => {
+            let selected_module_name = load_local_config(&repository.root_path)?
+                .current_module
+                .unwrap_or_default();
             let modules = repository.list_modules()?;
             let lines: Vec<String> = modules
                 .iter()
-                .map(|module| format!("{} {}", module.name, module.directory.dimmed()))
+                .map(|module| {
+                    let module_str = if module.name == selected_module_name {
+                        module.name.bold().underline()
+                    } else {
+                        module.name.normal()
+                    };
+                    format!("{} {}", module_str, module.directory.dimmed())
+                })
                 .collect();
             Ok(lines.join("\n"))
         }
@@ -92,7 +97,7 @@ fn process_module_command(
                     current_module: Some(module.name),
                 },
             )?;
-            Ok(format!("Module {} selected.", name.bold()))
+            Ok(format!("Module {} selected.", name.bold().underline()))
         }
     }
 }
@@ -116,26 +121,33 @@ fn process_version_command(
     match version_command {
         VersionCommand::New { name } => {
             let _ = repository.get_module(&module_name)?.add_version(name)?;
-            Ok(format!("Version {} added.", name.bold()))
+            Ok(format!("Version {} added.", name.bold().underline()))
         }
         VersionCommand::Remove { name } => {
             repository.get_module(&module_name)?.remove_version(name)?;
-            Ok(format!("Version {} removed.", name.bold()))
+            Ok(format!("Version {} removed.", name.bold().underline()))
         }
         VersionCommand::Select { name } => {
             let _ = repository.get_module(&module_name)?.switch_version(name)?;
-            Ok(format!("Version {} selected.", name.bold()))
+            Ok(format!("Version {} selected.", name.bold().underline()))
         }
         VersionCommand::Current => {
             let version_name = repository.get_module(&module_name)?.current_version.name;
-            Ok(version_name)
+            Ok(format!("{}", version_name.bold().underline()))
         }
         VersionCommand::List => {
+            let version_name = repository.get_module(&module_name)?.current_version.name;
             let versions: Vec<String> = repository
                 .get_module(&module_name)?
                 .list_versions()?
                 .iter()
-                .map(|version| version.name.to_string())
+                .map(|version| {
+                    if version.name == version_name {
+                        format!("{}", version.name.bold().underline())
+                    } else {
+                        format!("{}", version.name)
+                    }
+                })
                 .collect();
             Ok(versions.join("\n"))
         }
@@ -144,6 +156,6 @@ fn process_version_command(
 
 #[derive(Error, Debug)]
 pub enum VersionsCliError {
-    #[error("Cli error: `{0}`")]
+    #[error("`{0}`")]
     CliError(String),
 }
