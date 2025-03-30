@@ -40,6 +40,7 @@ impl Repository {
             config.modules.push(new_module.to_owned());
             config
         })?;
+        new_module.current_version.save()?;
         Ok(new_module)
     }
 
