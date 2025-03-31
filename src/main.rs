@@ -146,6 +146,14 @@ fn process_version_command(
                 current_version.name.bold().underline()
             ))
         }
+        VersionCommand::Load => {
+            let current_version = repository.get_module(&module_name)?.current_version;
+            current_version.load()?;
+            Ok(format!(
+                "Last snapshot of version {} loaded.",
+                current_version.name.bold().underline()
+            ))
+        }
         VersionCommand::List => {
             let version_name = repository.get_module(&module_name)?.current_version.name;
             let versions: Vec<String> = repository

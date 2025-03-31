@@ -90,4 +90,6 @@ pub enum VersionCommand {
     Status,
     /// Save current version
     Save,
+    /// Load last snapshot of the current version
+    Load,
 }
