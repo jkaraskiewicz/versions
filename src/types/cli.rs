@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueHint};
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Simple version control system")]
 pub struct Cli {
@@ -22,7 +22,7 @@ pub enum Command {
     /// Version commands
     Version {
         /// Name of the module
-        #[arg(default_value=None)]
+        #[arg(default_value = None)]
         name: Option<String>,
         #[clap(subcommand)]
         version_command: VersionCommand,
@@ -40,7 +40,7 @@ pub enum ModuleCommand {
         #[arg()]
         name: String,
         /// Path to the directory
-        #[arg(default_value=None)]
+        #[arg(default_value = None, value_hint = ValueHint::DirPath)]
         path: Option<PathBuf>,
     },
     /// Remove module
