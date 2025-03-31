@@ -3,7 +3,7 @@ use commons::utils::file_util::{read_file, write_file};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct LocalConfig {
     pub current_module: Option<String>,
 }

@@ -72,7 +72,8 @@ fn process_module_command(
             Ok(format!("Module {} removed.", name.bold().underline()))
         }
         ModuleCommand::List => {
-            let selected_module_name = load_local_config(&repository.root_path)?
+            let selected_module_name = load_local_config(&repository.root_path)
+                .unwrap_or_default()
                 .current_module
                 .unwrap_or_default();
             let modules = repository.list_modules()?;
@@ -115,7 +116,10 @@ fn process_version_command(
     let repository = open(&current_dir)?;
     let module_name = match module_name {
         Some(module_name) => module_name.to_string(),
-        None => load_local_config(&current_dir)?.current_module.unwrap(),
+        None => load_local_config(&current_dir)
+            .unwrap_or_default()
+            .current_module
+            .unwrap_or_default(),
     };
 
     match version_command {
