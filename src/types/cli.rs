@@ -35,7 +35,7 @@ pub enum Command {
 #[clap(rename_all = "lower_case")]
 pub enum ModuleCommand {
     /// Create module
-    New {
+    Add {
         /// Name of the module
         #[arg()]
         name: String,
@@ -63,7 +63,7 @@ pub enum ModuleCommand {
 #[clap(rename_all = "lower_case")]
 pub enum VersionCommand {
     /// Create new version
-    New {
+    Add {
         /// Name of the version
         #[arg()]
         name: String,

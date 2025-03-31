@@ -61,7 +61,7 @@ fn process_module_command(
     let repository = open(&current_dir)?;
 
     match module_command {
-        ModuleCommand::New { name, path } => {
+        ModuleCommand::Add { name, path } => {
             let path = path.to_owned().unwrap_or(current_dir.join(name));
             let _ = repository.add_module(name, path)?;
             Ok(format!("Module {} added.", name.bold().underline()))
@@ -123,7 +123,7 @@ fn process_version_command(
     };
 
     match version_command {
-        VersionCommand::New { name } => {
+        VersionCommand::Add { name } => {
             let _ = repository.get_module(&module_name)?.add_version(name)?;
             Ok(format!("Version {} added.", name.bold().underline()))
         }
