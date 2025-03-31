@@ -195,8 +195,8 @@ dependencies = [
 
 [[package]]
 name = "commons"
-version = "0.1.7"
-source = "git+ssh://git@github.com/jkaraskiewicz/commons.git#ce640842483a0fc503e76db80027d9c3e293373a"
+version = "0.1.9"
+source = "git+ssh://git@github.com/jkaraskiewicz/commons.git#f1f1713b867c971ee4c9306e3510e3c51cf80729"
 dependencies = [
  "chrono",
  "clap_complete",

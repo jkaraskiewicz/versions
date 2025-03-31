@@ -88,4 +88,6 @@ pub enum VersionCommand {
     Current,
     /// Workspace status
     Status,
+    /// Save current version
+    Save,
 }

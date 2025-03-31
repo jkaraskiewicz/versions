@@ -1,4 +1,5 @@
 use common::errors::VersionsError;
+pub use common::version_util::get_version_object_file_path;
 use handlers::repository_handler;
 use std::path::Path;
 pub use types::cli;

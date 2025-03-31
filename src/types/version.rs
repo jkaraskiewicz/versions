@@ -1,7 +1,9 @@
 use std::fs::{self, create_dir_all};
 
 use super::meta::ModulePtr;
-use crate::common::{constants, errors::VersionsError, flate_util, stream_util};
+use crate::common::{
+    constants, errors::VersionsError, flate_util, stream_util, version_util::get_file_name,
+};
 use commons::utils::hash_util::get_string_hash;
 use diffy::{create_patch, PatchFormatter};
 use serde::{Deserialize, Serialize};
@@ -15,7 +17,7 @@ pub struct Version {
 
 impl Version {
     pub fn save(&self) -> Result<(), VersionsError> {
-        let mut file_name = self.get_file_name();
+        let mut file_name = get_file_name(self);
         file_name = get_string_hash(&file_name);
 
         let dir_path = self
@@ -38,7 +40,7 @@ impl Version {
     }
 
     pub fn load(&self) -> Result<(), VersionsError> {
-        let mut file_name = self.get_file_name();
+        let mut file_name = get_file_name(self);
         file_name = get_string_hash(&file_name);
 
         let input_file_path = self
@@ -67,7 +69,7 @@ impl Version {
     }
 
     pub fn status(&self) -> Result<Option<String>, VersionsError> {
-        let mut file_name = self.get_file_name();
+        let mut file_name = get_file_name(self);
         file_name = get_string_hash(&file_name);
 
         let input_file_path = self
@@ -101,7 +103,7 @@ impl Version {
     }
 
     pub fn remove(&self) -> Result<(), VersionsError> {
-        let mut file_name = self.get_file_name();
+        let mut file_name = get_file_name(&self);
         file_name = get_string_hash(&file_name);
 
         let input_file_path = self
@@ -118,9 +120,5 @@ impl Version {
 
         fs::remove_file(input_file_path)?;
         Ok(())
-    }
-
-    fn get_file_name(&self) -> String {
-        format!("{}#{}", self.module.module_dir, self.name)
     }
 }

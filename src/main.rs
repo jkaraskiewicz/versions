@@ -3,10 +3,11 @@ use std::{env, str::from_utf8};
 use clap::{CommandFactory, Parser};
 use clap_complete::{generate, Shell};
 use colored::Colorize;
+use commons::utils::datetime_util::formatted_systemtime;
 use thiserror::Error;
 use versions::{
     cli::{Cli, Command, ModuleCommand, VersionCommand},
-    exists, init,
+    exists, get_version_object_file_path, init,
     local::{load_local_config, save_local_config, LocalConfig},
     open, Repository,
 };
@@ -137,6 +138,14 @@ fn process_version_command(
                 .status()?;
             Ok(status.unwrap_or("Workspace clean.".to_string()))
         }
+        VersionCommand::Save => {
+            let current_version = repository.get_module(&module_name)?.current_version;
+            current_version.save()?;
+            Ok(format!(
+                "Version {} saved.",
+                current_version.name.bold().underline()
+            ))
+        }
         VersionCommand::List => {
             let version_name = repository.get_module(&module_name)?.current_version.name;
             let versions: Vec<String> = repository
@@ -144,10 +153,13 @@ fn process_version_command(
                 .list_versions()
                 .iter()
                 .map(|version| {
+                    let path = get_version_object_file_path(version);
+                    let modified = path.metadata().unwrap().modified().unwrap();
+                    let time = formatted_systemtime(&modified);
                     if version.name == version_name {
-                        format!("{}", version.name.bold().underline())
+                        format!("{} ({})", version.name.bold().underline(), time.dimmed())
                     } else {
-                        version.name.to_string()
+                        format!("{} {}", version.name, time.dimmed())
                     }
                 })
                 .collect();
@@ -192,10 +204,13 @@ fn list_entities(
                     .list_versions()
                     .iter()
                     .map(|version| {
+                        let path = get_version_object_file_path(version);
+                        let modified = path.metadata().unwrap().modified().unwrap();
+                        let time = formatted_systemtime(&modified);
                         if version.name == version_name {
-                            format!("  {}", version.name.bold().underline())
+                            format!("  {} ({})", version.name.bold().underline(), time.dimmed())
                         } else {
-                            format!("  {}", version.name)
+                            format!("  {} ({})", version.name, time.dimmed())
                         }
                     })
                     .collect();
