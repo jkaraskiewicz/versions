@@ -3,7 +3,7 @@ use handlers::repository_handler;
 use std::path::Path;
 pub use types::cli;
 pub use types::local;
-use types::repository::Repository;
+pub use types::repository::Repository;
 
 mod common;
 mod handlers;

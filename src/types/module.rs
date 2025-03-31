@@ -18,8 +18,8 @@ pub struct Module {
 }
 
 impl Module {
-    pub fn list_versions(&self) -> Result<Vec<Version>, VersionsError> {
-        Ok(self.versions.to_owned())
+    pub fn list_versions(&self) -> Vec<Version> {
+        self.versions.to_owned()
     }
 
     pub fn add_version(mut self, name: &str) -> Result<Version, VersionsError> {

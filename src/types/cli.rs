@@ -27,6 +27,8 @@ pub enum Command {
         #[clap(subcommand)]
         version_command: VersionCommand,
     },
+    /// Show modules and versions
+    List,
     /// Generate shell completions
     Completions,
 }

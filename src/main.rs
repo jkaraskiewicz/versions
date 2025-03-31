@@ -8,7 +8,7 @@ use versions::{
     cli::{Cli, Command, ModuleCommand, VersionCommand},
     exists, init,
     local::{load_local_config, save_local_config, LocalConfig},
-    open,
+    open, Repository,
 };
 
 fn main() {
@@ -42,6 +42,15 @@ fn process() -> Result<String, Box<dyn std::error::Error>> {
             generate(current_shell(), &mut Cli::command(), "versions", &mut buf);
             Ok(from_utf8(buf.as_slice()).unwrap().to_string())
         }
+        Command::List => {
+            if !exists(&current_dir) {
+                return Err(
+                    VersionsCliError::CliError("Repository not initialized".to_string()).into(),
+                );
+            };
+            let repository = open(&current_dir)?;
+            list_entities(&repository, true)
+        }
     }
 }
 
@@ -71,25 +80,7 @@ fn process_module_command(
             repository.remove_module(&module)?;
             Ok(format!("Module {} removed.", name.bold().underline()))
         }
-        ModuleCommand::List => {
-            let selected_module_name = load_local_config(&repository.root_path)
-                .unwrap_or_default()
-                .current_module
-                .unwrap_or_default();
-            let modules = repository.list_modules()?;
-            let lines: Vec<String> = modules
-                .iter()
-                .map(|module| {
-                    let module_str = if module.name == selected_module_name {
-                        module.name.bold().underline()
-                    } else {
-                        module.name.normal()
-                    };
-                    format!("{} {}", module_str, module.directory.dimmed())
-                })
-                .collect();
-            Ok(lines.join("\n"))
-        }
+        ModuleCommand::List => list_entities(&repository, false),
         ModuleCommand::Select { name } => {
             let module = repository.get_module(name)?;
             save_local_config(
@@ -150,7 +141,7 @@ fn process_version_command(
             let version_name = repository.get_module(&module_name)?.current_version.name;
             let versions: Vec<String> = repository
                 .get_module(&module_name)?
-                .list_versions()?
+                .list_versions()
                 .iter()
                 .map(|version| {
                     if version.name == version_name {
@@ -165,8 +156,59 @@ fn process_version_command(
     }
 }
 
+fn list_entities(
+    repository: &Repository,
+    list_versions: bool,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let selected_module_name = load_local_config(&repository.root_path)
+        .unwrap_or_default()
+        .current_module
+        .unwrap_or_default();
+    let modules = repository.list_modules()?;
+    let max_name_length = modules
+        .iter()
+        .max_by(|x, y| x.name.len().cmp(&y.name.len()))
+        .map(|m| m.name.len())
+        .unwrap_or_default();
+    let lines: Vec<String> = modules
+        .iter()
+        .flat_map(|module| {
+            let mut module_lines: Vec<String> = vec![];
+            let module_str = if module.name == selected_module_name {
+                module.name.bold().underline()
+            } else {
+                module.name.normal()
+            };
+            module_lines.push(format!(
+                "{}{:length$}{}",
+                module_str,
+                " ",
+                module.directory.dimmed(),
+                length = max_name_length - module_str.len()
+            ));
+            if list_versions {
+                let version_name = module.current_version.name.to_string();
+                let versions: Vec<String> = module
+                    .list_versions()
+                    .iter()
+                    .map(|version| {
+                        if version.name == version_name {
+                            format!("  {}", version.name.bold().underline())
+                        } else {
+                            format!("  {}", version.name)
+                        }
+                    })
+                    .collect();
+                module_lines.extend(versions);
+            };
+            module_lines
+        })
+        .collect();
+    Ok(lines.join("\n"))
+}
+
 #[derive(Error, Debug)]
 pub enum VersionsCliError {
-    #[error("`{0}`")]
+    #[error("{0}")]
     CliError(String),
 }
