@@ -49,16 +49,16 @@ pub fn destream_dir(content: &str, target_dir_path: &Path) -> Result<(), Version
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
-struct StreamEntriesSet {
-    entries: Vec<StreamEntry>,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StreamEntriesSet {
+    pub entries: Vec<StreamEntry>,
 }
 
-#[derive(Serialize, Deserialize)]
-struct StreamEntry {
-    entry_type: StreamEntryType,
-    relative_path: PathBuf,
-    content: Option<String>,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct StreamEntry {
+    pub entry_type: StreamEntryType,
+    pub relative_path: PathBuf,
+    pub content: Option<String>,
 }
 
 impl StreamEntry {
@@ -71,8 +71,8 @@ impl StreamEntry {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Ord, PartialOrd, Eq)]
-enum StreamEntryType {
+#[derive(Clone, Serialize, Debug, Deserialize, PartialEq, Ord, PartialOrd, Eq)]
+pub enum StreamEntryType {
     File,
     Directory,
 }

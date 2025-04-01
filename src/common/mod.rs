@@ -1,4 +1,5 @@
 pub mod constants;
+pub mod diff_util;
 pub mod errors;
 pub mod flate_util;
 pub mod module_util;

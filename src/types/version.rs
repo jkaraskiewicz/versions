@@ -2,10 +2,14 @@ use std::fs::{self, create_dir_all};
 
 use super::meta::ModulePtr;
 use crate::common::{
-    constants, errors::VersionsError, flate_util, stream_util, version_util::get_file_name,
+    constants,
+    diff_util::get_version_files_diff,
+    errors::VersionsError,
+    flate_util,
+    stream_util::{self, StreamEntriesSet},
+    version_util::get_file_name,
 };
 use commons::utils::hash_util::get_string_hash;
-use diffy::{create_patch, PatchFormatter};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -87,19 +91,16 @@ impl Version {
             .to_path_buf();
 
         let current_content = stream_util::stream_dir(&dir_path)?;
-        let saved_content = if input_file_path.exists() {
-            flate_util::deflate_to_string(&input_file_path)?
+        let current_entries_set: StreamEntriesSet = toml::from_str(&current_content)?;
+        let saved_entries_set = if input_file_path.exists() {
+            let saved_content = flate_util::deflate_to_string(&input_file_path)?;
+            toml::from_str(&saved_content)?
         } else {
-            "".to_string()
+            StreamEntriesSet {
+                entries: Vec::new(),
+            }
         };
-
-        let patch = create_patch(&saved_content, &current_content);
-        if patch.hunks().is_empty() {
-            Ok(None)
-        } else {
-            let formatter = PatchFormatter::new().with_color();
-            Ok(Some(format!("{}", formatter.fmt_patch(&patch))))
-        }
+        get_version_files_diff(&saved_entries_set, &current_entries_set, &self.module)
     }
 
     pub fn remove(&self) -> Result<(), VersionsError> {
