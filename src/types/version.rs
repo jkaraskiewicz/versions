@@ -104,7 +104,7 @@ impl Version {
     }
 
     pub fn remove(&self) -> Result<(), VersionsError> {
-        let mut file_name = get_file_name(&self);
+        let mut file_name = get_file_name(self);
         file_name = get_string_hash(&file_name);
 
         let input_file_path = self

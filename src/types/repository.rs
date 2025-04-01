@@ -6,7 +6,6 @@ use crate::common::{
     errors::VersionsError,
     module_util::{create_default, is_module_defined},
 };
-use commons::utils::file_util::exists_directory;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -29,7 +28,7 @@ impl Repository {
     }
 
     pub fn add_module<P: AsRef<Path>>(&self, name: &str, path: P) -> Result<Module, VersionsError> {
-        if !exists_directory(path.as_ref()) {
+        if !path.as_ref().is_dir() {
             return Err(VersionsError::NotADirectory);
         }
         if is_module_defined(self, name)? {
@@ -46,7 +45,7 @@ impl Repository {
 
     pub fn remove_module(&self, module: &Module) -> Result<(), VersionsError> {
         let module_dir_path = self.root_path.join(&module.directory);
-        if !exists_directory(&module_dir_path) {
+        if !module_dir_path.is_dir() {
             return Err(VersionsError::NotADirectory);
         }
         if !is_module_defined(self, &module.name)? {

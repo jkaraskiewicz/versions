@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use commons::utils::file_util;
-
 use crate::{
     common::{constants, errors::VersionsError, repository_util::from_path},
     types::repository::Repository,
@@ -28,5 +26,5 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Repository, VersionsError> {
 
 pub fn exists<P: AsRef<Path>>(path: P) -> bool {
     let repository_dir_path = path.as_ref().join(constants::REPOSITORY_DIR);
-    file_util::exists_directory(&repository_dir_path)
+    repository_dir_path.is_dir()
 }

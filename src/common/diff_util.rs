@@ -36,7 +36,7 @@ pub fn get_version_files_diff(
         let modified_entry_equivalent = modified_entries
             .iter()
             .find(|el| el.relative_path == entry.relative_path);
-        if let Some(_) = modified_entry_equivalent {
+        if modified_entry_equivalent.is_some() {
             continue;
         } else {
             let diff = get_stream_entry_diff(Some(entry.to_owned()), None, module)?;
@@ -66,7 +66,9 @@ fn get_stream_entry_diff(
                     .join(&original.relative_path);
                 if should_print_header(&original.relative_path, module)? {
                     result.push(
-                        format!("{}", path.to_str().unwrap())
+                        path.to_str()
+                            .unwrap()
+                            .to_string()
                             .dimmed()
                             .underline()
                             .to_string(),

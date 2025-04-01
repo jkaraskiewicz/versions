@@ -4,7 +4,7 @@ use super::{
     version::Version,
 };
 use crate::common::{errors::VersionsError, repository_util::from_path};
-use commons::traits::vec_traits::Contains;
+use commons::traits::collections::Contains;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]

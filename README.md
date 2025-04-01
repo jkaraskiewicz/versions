@@ -1,8 +1,6 @@
 <h1>versions</h1>
 <h2>Simple module based version control system</h2>
 
-------------------------------------------------------------------------
-
 ## Introduction to _versions_
 
 _versions_ is a simple VCS focused on maintaining multiple versions of files.

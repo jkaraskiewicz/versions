@@ -1,5 +1,5 @@
 use super::errors::VersionsError;
-use commons::utils::file_util::{exists_directory, read_file, write_file};
+use commons::utils::file_util::{read_file, write_file};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::create_dir_all,
@@ -79,7 +79,7 @@ pub enum StreamEntryType {
 
 impl StreamEntryType {
     fn for_path(path: &Path) -> Self {
-        if exists_directory(path) {
+        if path.is_dir() {
             Self::Directory
         } else {
             Self::File

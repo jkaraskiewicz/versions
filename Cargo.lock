@@ -195,8 +195,8 @@ dependencies = [
 
 [[package]]
 name = "commons"
-version = "0.1.9"
-source = "git+ssh://git@github.com/jkaraskiewicz/commons.git#f1f1713b867c971ee4c9306e3510e3c51cf80729"
+version = "0.2.0"
+source = "git+https://github.com/jkaraskiewicz/commons.git#5ecbbae30f9ba67d01a1927aa038f2f51dee315a"
 dependencies = [
  "chrono",
  "clap_complete",
@@ -609,7 +609,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "versions"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "clap",
