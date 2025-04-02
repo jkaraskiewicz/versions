@@ -1,5 +1,5 @@
 use colored::Colorize;
-use common::errors::VersionsError;
+pub use common::errors::VersionsError;
 pub use common::version_util::get_version_object_file_path;
 use commons::utils::datetime_util::formatted_systemtime;
 use handlers::repository_handler;
@@ -36,11 +36,11 @@ pub fn commands() -> VersionsCliCommand {
 pub struct VersionsCliCommand {}
 
 impl VersionsCliCommand {
-    pub fn current_module(&self) -> Result<Option<String>, Box<dyn std::error::Error>> {
+    pub fn current_module(&self) -> Result<Option<String>, VersionsError> {
         let current_dir = env::current_dir()?;
 
         if !exists(&current_dir) {
-            return Err(VersionsError::RepositoryNotInitialized.into());
+            return Err(VersionsError::RepositoryNotInitialized);
         };
 
         let repository = open(&current_dir)?;
@@ -66,30 +66,27 @@ impl VersionsCli {
         VersionsCli {}
     }
 
-    pub fn init(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn init(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
 
         if exists(&current_dir) {
-            Err(VersionsError::RepositoryAlreadyInitialized.into())
+            Err(VersionsError::RepositoryAlreadyInitialized)
         } else {
             init(&current_dir)?;
             Ok("Repository initialized successfully.".into())
         }
     }
 
-    pub fn list(&self) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn list(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
         if !exists(&current_dir) {
-            return Err(VersionsError::RepositoryNotInitialized.into());
+            return Err(VersionsError::RepositoryNotInitialized);
         };
         let repository = open(&current_dir)?;
         list_entities(&repository, true)
     }
 
-    pub fn module(
-        &self,
-        module_command: &ModuleCommand,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn module(&self, module_command: &ModuleCommand) -> Result<String, VersionsError> {
         process_module_command(module_command)
     }
 
@@ -97,18 +94,16 @@ impl VersionsCli {
         &self,
         module_name: &Option<String>,
         version_command: &VersionCommand,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    ) -> Result<String, VersionsError> {
         process_version_command(module_name, version_command)
     }
 }
 
-fn process_module_command(
-    module_command: &ModuleCommand,
-) -> Result<String, Box<dyn std::error::Error>> {
+fn process_module_command(module_command: &ModuleCommand) -> Result<String, VersionsError> {
     let current_dir = env::current_dir()?;
 
     if !exists(&current_dir) {
-        return Err(VersionsError::RepositoryNotInitialized.into());
+        return Err(VersionsError::RepositoryNotInitialized);
     };
 
     let repository = open(&current_dir)?;
@@ -152,11 +147,11 @@ fn process_module_command(
 fn process_version_command(
     module_name: &Option<String>,
     version_command: &VersionCommand,
-) -> Result<String, Box<dyn std::error::Error>> {
+) -> Result<String, VersionsError> {
     let current_dir = env::current_dir()?;
 
     if !exists(&current_dir) {
-        return Err(VersionsError::RepositoryNotInitialized.into());
+        return Err(VersionsError::RepositoryNotInitialized);
     };
 
     let repository = open(&current_dir)?;
@@ -230,10 +225,7 @@ fn process_version_command(
     }
 }
 
-fn list_entities(
-    repository: &Repository,
-    list_versions: bool,
-) -> Result<String, Box<dyn std::error::Error>> {
+fn list_entities(repository: &Repository, list_versions: bool) -> Result<String, VersionsError> {
     let selected_module_name = load_local_config(&repository.root_path)
         .unwrap_or_default()
         .current_module

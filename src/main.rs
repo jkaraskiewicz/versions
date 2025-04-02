@@ -2,10 +2,9 @@ use std::str::from_utf8;
 
 use clap::{CommandFactory, Parser};
 use clap_complete::{generate, Shell};
-use thiserror::Error;
 use versions::{
     cli::{Cli, Command},
-    VersionsCli,
+    VersionsCli, VersionsError,
 };
 
 fn main() {
@@ -16,7 +15,7 @@ fn main() {
     println!("{}", output);
 }
 
-fn process() -> Result<String, Box<dyn std::error::Error>> {
+fn process() -> Result<String, VersionsError> {
     let cli = Cli::parse();
     let version_cli = VersionsCli::new();
 
@@ -38,10 +37,4 @@ fn process() -> Result<String, Box<dyn std::error::Error>> {
 
 fn current_shell() -> Shell {
     clap_complete::Shell::from_env().unwrap_or(Shell::Zsh)
-}
-
-#[derive(Error, Debug)]
-pub enum VersionsCliError {
-    #[error("{0}")]
-    CliError(String),
 }
