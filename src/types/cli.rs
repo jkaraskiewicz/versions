@@ -59,6 +59,8 @@ pub enum ModuleCommand {
     },
     /// List modules
     List,
+    /// Current module
+    Current,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq)]

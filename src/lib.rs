@@ -27,7 +27,31 @@ pub fn exists<P: AsRef<Path>>(path: P) -> bool {
     repository_handler::exists(path)
 }
 
+pub fn commands() -> VersionsCliCommand {
+    VersionsCliCommand {}
+}
+
 // CLI exports
+
+pub struct VersionsCliCommand {}
+
+impl VersionsCliCommand {
+    pub fn current_module(&self) -> Result<Option<String>, Box<dyn std::error::Error>> {
+        let current_dir = env::current_dir()?;
+
+        if !exists(&current_dir) {
+            return Err(VersionsError::RepositoryNotInitialized.into());
+        };
+
+        let repository = open(&current_dir)?;
+
+        let selected_module_name = load_local_config(&repository.root_path)
+            .unwrap_or_default()
+            .current_module;
+
+        Ok(selected_module_name)
+    }
+}
 
 pub struct VersionsCli {}
 
@@ -101,6 +125,17 @@ fn process_module_command(
             Ok(format!("Module {} removed.", name.bold().underline()))
         }
         ModuleCommand::List => list_entities(&repository, false),
+        ModuleCommand::Current => {
+            let selected_module_name = load_local_config(&repository.root_path)
+                .unwrap_or_default()
+                .current_module
+                .unwrap_or_default();
+            if selected_module_name.is_empty() {
+                Ok("<No selected module>".to_string())
+            } else {
+                Ok(selected_module_name.bold().underline().to_string())
+            }
+        }
         ModuleCommand::Select { name } => {
             let module = repository.get_module(name)?;
             save_local_config(
