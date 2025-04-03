@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ModulesConfig {
     pub modules: Vec<Module>,
+    pub current_module: Option<Module>,
 }
 
 pub fn read_modules_config(repository: &Repository) -> Result<ModulesConfig, VersionsError> {
@@ -97,5 +98,17 @@ fn append_metadata_to_config(
             ..module.to_owned()
         })
         .collect();
-    Ok(ModulesConfig { modules })
+
+    let mut updated_current_module: Option<Module> = None;
+    if let Some(current_module) = &config.current_module {
+        updated_current_module = modules
+            .iter()
+            .find(|module| module.name == current_module.name)
+            .map(|el| el.to_owned());
+    }
+
+    Ok(ModulesConfig {
+        modules,
+        current_module: updated_current_module,
+    })
 }

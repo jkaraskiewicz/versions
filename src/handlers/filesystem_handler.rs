@@ -18,6 +18,7 @@ pub fn initialize_repository_filesystem(repository: &Repository) -> Result<(), V
         repository,
         &ModulesConfig {
             modules: Vec::new(),
+            current_module: None,
         },
     )?;
     Ok(())

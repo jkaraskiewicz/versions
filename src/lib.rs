@@ -3,13 +3,14 @@ pub use common::errors::VersionsError;
 pub use common::version_util::get_version_object_file_path;
 use commons::utils::datetime_util::formatted_systemtime;
 use handlers::repository_handler;
-use std::env;
+use std::env::{self};
 use std::path::Path;
 pub use types::cli;
-use types::cli::{ModuleCommand, VersionCommand};
-pub use types::local;
-use types::local::{load_local_config, save_local_config, LocalConfig};
 pub use types::repository::Repository;
+use types::{
+    cli::{ModuleCommand, VersionCommand},
+    modules_config::{read_modules_config, update_modules_config},
+};
 
 mod common;
 mod handlers;
@@ -45,11 +46,9 @@ impl VersionsCliCommand {
 
         let repository = open(&current_dir)?;
 
-        let selected_module_name = load_local_config(&repository.root_path)
-            .unwrap_or_default()
-            .current_module;
+        let selected_module_name = read_modules_config(&repository)?.current_module;
 
-        Ok(selected_module_name)
+        Ok(selected_module_name.map(|el| el.name))
     }
 }
 
@@ -121,10 +120,7 @@ fn process_module_command(module_command: &ModuleCommand) -> Result<String, Vers
         }
         ModuleCommand::List => list_entities(&repository, false),
         ModuleCommand::Current => {
-            let selected_module_name = load_local_config(&repository.root_path)
-                .unwrap_or_default()
-                .current_module
-                .unwrap_or_default();
+            let selected_module_name = current_module_name(&repository)?;
             if selected_module_name.is_empty() {
                 Ok("<No selected module>".to_string())
             } else {
@@ -133,12 +129,10 @@ fn process_module_command(module_command: &ModuleCommand) -> Result<String, Vers
         }
         ModuleCommand::Select { name } => {
             let module = repository.get_module(name)?;
-            save_local_config(
-                repository.root_path,
-                &LocalConfig {
-                    current_module: Some(module.name),
-                },
-            )?;
+            update_modules_config(&repository, |mut config| {
+                config.current_module = Some(module.to_owned());
+                config
+            })?;
             Ok(format!("Module {} selected.", name.bold().underline()))
         }
     }
@@ -157,10 +151,7 @@ fn process_version_command(
     let repository = open(&current_dir)?;
     let module_name = match module_name {
         Some(module_name) => module_name.to_string(),
-        None => load_local_config(&current_dir)
-            .unwrap_or_default()
-            .current_module
-            .unwrap_or_default(),
+        None => current_module_name(&repository)?,
     };
 
     match version_command {
@@ -226,10 +217,7 @@ fn process_version_command(
 }
 
 fn list_entities(repository: &Repository, list_versions: bool) -> Result<String, VersionsError> {
-    let selected_module_name = load_local_config(&repository.root_path)
-        .unwrap_or_default()
-        .current_module
-        .unwrap_or_default();
+    let selected_module_name = current_module_name(repository)?;
     let modules = repository.list_modules()?;
     let max_name_length = modules
         .iter()
@@ -274,4 +262,12 @@ fn list_entities(repository: &Repository, list_versions: bool) -> Result<String,
         })
         .collect();
     Ok(lines.join("\n"))
+}
+
+fn current_module_name(repository: &Repository) -> Result<String, VersionsError> {
+    let selected_module_name = read_modules_config(repository)?
+        .current_module
+        .map(|el| el.name)
+        .unwrap_or_default();
+    Ok(selected_module_name)
 }

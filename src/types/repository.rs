@@ -58,6 +58,11 @@ impl Repository {
         Ok(())
     }
 
+    pub fn current_module(&self) -> Result<Option<Module>, VersionsError> {
+        let modules_config = read_modules_config(self)?;
+        Ok(modules_config.current_module)
+    }
+
     pub fn list_modules(&self) -> Result<Vec<Module>, VersionsError> {
         let modules_config = read_modules_config(self)?;
         Ok(modules_config.modules)
