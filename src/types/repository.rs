@@ -37,6 +37,7 @@ impl Repository {
         let new_module = create_default(self, name, path.as_ref());
         update_modules_config(self, |mut config| {
             config.modules.push(new_module.to_owned());
+            config.current_module = Some(new_module.to_owned());
             config
         })?;
         new_module.current_version.save()?;
