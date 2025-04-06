@@ -4,7 +4,7 @@ use super::{
     version::Version,
 };
 use crate::common::{errors::VersionsError, repository_util::from_path};
-use commons::traits::collections::Contains;
+use commons::traits::collections::{Contains, FirstItemPredicate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -27,7 +27,7 @@ impl Module {
             name: name.to_string(),
             module: ModulePtr::create(self),
         };
-        let already_exists = self.versions.has(&new_version);
+        let already_exists = self.versions.contains(&new_version);
         if already_exists {
             Err(VersionsError::VersionAlreadyExists(name.to_string()))
         } else {
@@ -46,10 +46,20 @@ impl Module {
     }
 
     pub fn remove_version(&mut self, name: &str) -> Result<(), VersionsError> {
-        let version = self.versions.iter().find(|el| el.name == name);
+        let version = self
+            .versions
+            .first(|el| el.name == name)
+            .map(|v| v.to_owned());
         if let Some(version) = version {
             version.remove()?;
             self.versions.retain(|el| el.name != name);
+
+            if let Some(current_version) = &self.current_version {
+                if current_version.name == version.name {
+                    self.current_version = None;
+                }
+            }
+
             update_modules_config(
                 &from_path(&self.repository_ptr.repository_path),
                 |mut config| {

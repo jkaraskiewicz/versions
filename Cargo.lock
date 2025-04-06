@@ -190,13 +190,13 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde0e0ec90c9dfb3b4b1a0891a7dcd0e2bffde2f7efed5fe7c9bb00e5bfb915e"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
 name = "commons"
-version = "0.2.1"
-source = "git+https://github.com/jkaraskiewicz/commons.git#97a97e333363dc7dbd57860cf69c9cf3327aae9f"
+version = "0.2.3"
+source = "git+https://github.com/jkaraskiewicz/commons.git#ce4af82c6047b78bdbc187e00787648f7705ba21"
 dependencies = [
  "chrono",
  "clap_complete",
@@ -609,7 +609,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "versions"
-version = "0.1.9"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -699,7 +699,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
