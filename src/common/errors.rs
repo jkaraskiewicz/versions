@@ -33,6 +33,8 @@ pub enum VersionsError {
     VersionAlreadyExists(String),
     #[error("No current version selected in module `{0}`")]
     NoCurrentVersionInModule(String),
+    #[error("No current module selected")]
+    NoCurrentModule,
     #[error("Version `{0}` does not exist")]
     VersionDoesNotExists(String),
     #[error("Version `{0}` was not saved, so it can't be loaded")]

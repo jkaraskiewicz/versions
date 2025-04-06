@@ -86,6 +86,15 @@ impl Repository {
         Ok(modules_config.current_module)
     }
 
+    pub fn force_current_module(&self) -> Result<Module, VersionsError> {
+        let modules_config = read_modules_config(self)?;
+        if let Some(current_module) = &modules_config.current_module {
+            Ok(current_module.to_owned())
+        } else {
+            Err(VersionsError::NoCurrentModule)
+        }
+    }
+
     pub fn list_modules(&self) -> Result<Vec<Module>, VersionsError> {
         let modules_config = read_modules_config(self)?;
         Ok(modules_config.modules)
