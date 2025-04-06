@@ -6,7 +6,9 @@ use handlers::repository_handler;
 use std::env::{self};
 use std::path::Path;
 pub use types::cli;
+pub use types::module::Module;
 pub use types::repository::Repository;
+pub use types::version::Version;
 use types::{
     cli::{ModuleCommand, VersionCommand},
     modules_config::read_modules_config,
