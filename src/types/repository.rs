@@ -37,11 +37,21 @@ impl Repository {
         let new_module = create_default(self, name, path.as_ref());
         update_modules_config(self, |mut config| {
             config.modules.push(new_module.to_owned());
-            config.current_module = Some(new_module.to_owned());
+            if config.current_module.is_none() {
+                config.current_module = Some(new_module.to_owned());
+            }
             config
         })?;
         new_module.current_version.save()?;
         Ok(new_module)
+    }
+
+    pub fn select_module(&self, module: &Module) -> Result<Module, VersionsError> {
+        update_modules_config(self, |mut config| {
+            config.current_module = Some(module.to_owned());
+            config
+        })?;
+        Ok(module.to_owned())
     }
 
     pub fn remove_module(&self, module: &Module) -> Result<(), VersionsError> {
@@ -52,8 +62,18 @@ impl Repository {
         if !is_module_defined(self, &module.name)? {
             return Err(VersionsError::ModuleDoesNotExists(module.name.to_string()));
         }
+
+        for version in &module.versions {
+            version.remove()?;
+        }
+
         update_modules_config(self, |mut config| {
             config.modules.retain(|m| m.name != module.name);
+            if let Some(current_module) = &config.current_module {
+                if current_module.name == module.name {
+                    config.current_module = None;
+                }
+            }
             config
         })?;
         Ok(())

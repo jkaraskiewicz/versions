@@ -64,7 +64,7 @@ impl Module {
         }
     }
 
-    pub fn switch_version(mut self, name: &str) -> Result<Version, VersionsError> {
+    pub fn select_version(mut self, name: &str) -> Result<Version, VersionsError> {
         let version = self.versions.iter().find(|version| version.name == name);
         if let Some(version) = version {
             self.current_version.save()?;

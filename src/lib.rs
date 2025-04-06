@@ -9,7 +9,7 @@ pub use types::cli;
 pub use types::repository::Repository;
 use types::{
     cli::{ModuleCommand, VersionCommand},
-    modules_config::{read_modules_config, update_modules_config},
+    modules_config::read_modules_config,
 };
 
 mod common;
@@ -129,10 +129,7 @@ fn process_module_command(module_command: &ModuleCommand) -> Result<String, Vers
         }
         ModuleCommand::Select { name } => {
             let module = repository.get_module(name)?;
-            update_modules_config(&repository, |mut config| {
-                config.current_module = Some(module.to_owned());
-                config
-            })?;
+            repository.select_module(&module)?;
             Ok(format!("Module {} selected.", name.bold().underline()))
         }
     }
@@ -164,7 +161,7 @@ fn process_version_command(
             Ok(format!("Version {} removed.", name.bold().underline()))
         }
         VersionCommand::Select { name } => {
-            let _ = repository.get_module(&module_name)?.switch_version(name)?;
+            let _ = repository.get_module(&module_name)?.select_version(name)?;
             Ok(format!("Version {} selected.", name.bold().underline()))
         }
         VersionCommand::Current => {

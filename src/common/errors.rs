@@ -25,6 +25,8 @@ pub enum VersionsError {
     YamlSerializationError(#[from] serde_yml::Error),
     #[error("Module `{0}` already exists")]
     ModuleAlreadyExists(String),
+    #[error("Module `{0}` is currently selected so it cannot be removed.")]
+    CannotRemoveSelectedModule(String),
     #[error("Module `{0}` does not exist")]
     ModuleDoesNotExists(String),
     #[error("Version `{0}` already exists")]
