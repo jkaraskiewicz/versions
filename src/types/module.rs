@@ -22,7 +22,7 @@ impl Module {
         self.versions.to_owned()
     }
 
-    pub fn add_version(mut self, name: &str) -> Result<Version, VersionsError> {
+    pub fn add_version(&mut self, name: &str) -> Result<Version, VersionsError> {
         let new_version = Version {
             name: name.to_string(),
             module: ModulePtr::create(&self),
@@ -45,7 +45,7 @@ impl Module {
         }
     }
 
-    pub fn remove_version(mut self, name: &str) -> Result<(), VersionsError> {
+    pub fn remove_version(&mut self, name: &str) -> Result<(), VersionsError> {
         let version = self.versions.iter().find(|el| el.name == name);
         if let Some(version) = version {
             version.remove()?;
@@ -64,7 +64,7 @@ impl Module {
         }
     }
 
-    pub fn select_version(mut self, name: &str) -> Result<Version, VersionsError> {
+    pub fn select_version(&mut self, name: &str) -> Result<Version, VersionsError> {
         let version = self.versions.iter().find(|version| version.name == name);
         if let Some(version) = version {
             self.current_version.save()?;
