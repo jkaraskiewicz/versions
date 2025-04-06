@@ -8,7 +8,7 @@ use crate::types::{
     version::Version,
 };
 
-use super::errors::VersionsError;
+use super::{constants, errors::VersionsError};
 
 pub fn is_module_defined(repository: &Repository, name: &str) -> Result<bool, VersionsError> {
     let config = read_modules_config(repository)?;
@@ -18,7 +18,7 @@ pub fn is_module_defined(repository: &Repository, name: &str) -> Result<bool, Ve
 
 pub fn create_default(repository: &Repository, name: &str, dir_path: &Path) -> Module {
     let version = Version {
-        name: "default".to_string(),
+        name: constants::DEFAULT_VERSION.to_string(),
         module: ModulePtr {
             repository_path: repository.root_path.to_path_buf(),
             module_name: name.to_string(),
