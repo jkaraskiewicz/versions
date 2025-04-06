@@ -13,12 +13,10 @@ pub enum VersionsError {
     TomlDeserializationError(#[from] de::Error),
     #[error("Commons error: `{0}`")]
     CommonsError(#[from] commons::types::errors::CommonsError),
-    #[error("Repository not found")]
-    RepositoryNotFound,
+    #[error("Repository not found or not initialized")]
+    RepositoryNotFoundOrInitialized,
     #[error("Repository already initialized")]
     RepositoryAlreadyInitialized,
-    #[error("Repository not initialized")]
-    RepositoryNotInitialized,
     #[error("Not a directory")]
     NotADirectory,
     #[error("Yaml serialization error: `{0}`")]

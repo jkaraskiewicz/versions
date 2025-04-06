@@ -19,9 +19,9 @@ pub fn read_modules_config(repository: &Repository) -> Result<ModulesConfig, Ver
         .root_path
         .join(constants::REPOSITORY_DIR)
         .join(constants::MODULES_FILE);
-    let content = read_file(&path).map_err(|_| VersionsError::RepositoryNotInitialized)?;
-    let config: ModulesConfig =
-        serde_yml::from_str(&content).map_err(|_| VersionsError::RepositoryNotInitialized)?;
+    let content = read_file(&path).map_err(|_| VersionsError::RepositoryNotFoundOrInitialized)?;
+    let config: ModulesConfig = serde_yml::from_str(&content)
+        .map_err(|_| VersionsError::RepositoryNotFoundOrInitialized)?;
     let config = append_metadata_to_config(repository, &config)?;
     Ok(config)
 }

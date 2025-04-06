@@ -27,8 +27,8 @@ pub enum Command {
         #[clap(subcommand)]
         version_command: VersionCommand,
     },
-    /// Show modules and versions
-    List,
+    /// Show repository state (modules, versions)
+    State,
     /// Generate shell completions
     Completions,
 }

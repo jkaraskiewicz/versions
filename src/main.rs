@@ -31,7 +31,7 @@ fn process() -> Result<String, VersionsError> {
             generate(current_shell(), &mut Cli::command(), "versions", &mut buf);
             Ok(from_utf8(buf.as_slice()).unwrap().to_string())
         }
-        Command::List => version_cli.list(),
+        Command::State => version_cli.state(),
     }
 }
 

@@ -4,7 +4,7 @@ pub use common::version_util::get_version_object_file_path;
 use commons::utils::datetime_util::formatted_systemtime;
 use handlers::repository_handler;
 use std::env::{self};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 pub use types::cli;
 pub use types::module::Module;
 pub use types::repository::Repository;
@@ -22,12 +22,12 @@ pub fn init<P: AsRef<Path>>(path: P) -> Result<Repository, VersionsError> {
     repository_handler::init(path)
 }
 
-pub fn open<P: AsRef<Path>>(path: P) -> Result<Repository, VersionsError> {
-    repository_handler::open(path)
+pub fn open<P: AsRef<Path>>(path: P, look_up: bool) -> Result<Repository, VersionsError> {
+    repository_handler::open(path, look_up)
 }
 
-pub fn exists<P: AsRef<Path>>(path: P) -> bool {
-    repository_handler::exists(path)
+pub fn exists<P: AsRef<Path>>(path: P, look_up: bool) -> Option<PathBuf> {
+    repository_handler::exists(path, look_up)
 }
 
 pub fn commands() -> VersionsCliCommand {
@@ -41,12 +41,7 @@ pub struct VersionsCliCommand {}
 impl VersionsCliCommand {
     pub fn current_module(&self) -> Result<Option<String>, VersionsError> {
         let current_dir = env::current_dir()?;
-
-        if !exists(&current_dir) {
-            return Err(VersionsError::RepositoryNotInitialized);
-        };
-
-        let repository = open(&current_dir)?;
+        let repository = open(&current_dir, true)?;
 
         let selected_module_name = read_modules_config(&repository)?.current_module;
 
@@ -70,7 +65,7 @@ impl VersionsCli {
     pub fn init(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
 
-        if exists(&current_dir) {
+        if exists(&current_dir, false).is_some() {
             Err(VersionsError::RepositoryAlreadyInitialized)
         } else {
             init(&current_dir)?;
@@ -78,12 +73,9 @@ impl VersionsCli {
         }
     }
 
-    pub fn list(&self) -> Result<String, VersionsError> {
+    pub fn state(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
-        if !exists(&current_dir) {
-            return Err(VersionsError::RepositoryNotInitialized);
-        };
-        let repository = open(&current_dir)?;
+        let repository = open(&current_dir, true)?;
         list_entities(&repository, true)
     }
 
@@ -102,12 +94,7 @@ impl VersionsCli {
 
 fn process_module_command(module_command: &ModuleCommand) -> Result<String, VersionsError> {
     let current_dir = env::current_dir()?;
-
-    if !exists(&current_dir) {
-        return Err(VersionsError::RepositoryNotInitialized);
-    };
-
-    let repository = open(&current_dir)?;
+    let repository = open(&current_dir, true)?;
 
     match module_command {
         ModuleCommand::Add { name, path } => {
@@ -142,12 +129,8 @@ fn process_version_command(
     version_command: &VersionCommand,
 ) -> Result<String, VersionsError> {
     let current_dir = env::current_dir()?;
+    let repository = open(&current_dir, true)?;
 
-    if !exists(&current_dir) {
-        return Err(VersionsError::RepositoryNotInitialized);
-    };
-
-    let repository = open(&current_dir)?;
     let module_name = match module_name {
         Some(module_name) => module_name.to_string(),
         None => current_module_name(&repository)?,
