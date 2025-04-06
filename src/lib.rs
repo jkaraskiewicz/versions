@@ -76,7 +76,12 @@ impl VersionsCli {
     pub fn state(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
         let repository = open(&current_dir, true)?;
-        list_entities(&repository, true)
+        let repository_str = format!(
+            "Repository root: {}",
+            repository.root_path.to_str().unwrap().dimmed()
+        );
+        let entities = list_entities(&repository, true)?;
+        Ok(format!("{}\n{}", repository_str, entities))
     }
 
     pub fn module(&self, module_command: &ModuleCommand) -> Result<String, VersionsError> {
