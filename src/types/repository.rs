@@ -42,7 +42,9 @@ impl Repository {
             }
             config
         })?;
-        new_module.current_version.save()?;
+        if let Some(current_version) = &new_module.current_version {
+            current_version.save()?;
+        }
         Ok(new_module)
     }
 
@@ -92,7 +94,9 @@ impl Repository {
     pub fn save_workspace(&self) -> Result<(), VersionsError> {
         let modules = self.list_modules()?;
         for module in modules {
-            module.current_version()?.save()?;
+            if let Some(current_version) = &module.current_version {
+                current_version.save()?;
+            }
         }
         Ok(())
     }
@@ -100,7 +104,9 @@ impl Repository {
     pub fn load_workspace(&self) -> Result<(), VersionsError> {
         let modules = self.list_modules()?;
         for module in modules {
-            module.current_version()?.load()?;
+            if let Some(current_version) = &module.current_version {
+                current_version.load()?;
+            }
         }
         Ok(())
     }

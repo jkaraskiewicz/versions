@@ -165,18 +165,23 @@ fn process_version_command(
             Ok(format!("Version {} selected.", name.bold().underline()))
         }
         VersionCommand::Current => {
-            let version_name = repository.get_module(&module_name)?.current_version.name;
+            let version_name = repository
+                .get_module(&module_name)?
+                .force_current_version()?
+                .name;
             Ok(format!("{}", version_name.bold().underline()))
         }
         VersionCommand::Status => {
             let status = repository
                 .get_module(&module_name)?
-                .current_version
+                .force_current_version()?
                 .status()?;
             Ok(status.unwrap_or("Workspace clean.".to_string()))
         }
         VersionCommand::Save => {
-            let current_version = repository.get_module(&module_name)?.current_version;
+            let current_version = repository
+                .get_module(&module_name)?
+                .force_current_version()?;
             current_version.save()?;
             Ok(format!(
                 "Version {} saved.",
@@ -184,7 +189,9 @@ fn process_version_command(
             ))
         }
         VersionCommand::Load => {
-            let current_version = repository.get_module(&module_name)?.current_version;
+            let current_version = repository
+                .get_module(&module_name)?
+                .force_current_version()?;
             current_version.load()?;
             Ok(format!(
                 "Last snapshot of version {} loaded.",
@@ -192,7 +199,10 @@ fn process_version_command(
             ))
         }
         VersionCommand::List => {
-            let version_name = repository.get_module(&module_name)?.current_version.name;
+            let version_name = repository
+                .get_module(&module_name)?
+                .current_version
+                .map(|v| v.name);
             let versions: Vec<String> = repository
                 .get_module(&module_name)?
                 .list_versions()
@@ -201,6 +211,7 @@ fn process_version_command(
                     let path = get_version_object_file_path(version);
                     let modified = path.metadata().unwrap().modified().unwrap();
                     let time = formatted_systemtime(&modified);
+                    let version_name = version_name.to_owned().unwrap_or_default();
                     if version.name == version_name {
                         format!("{} ({})", version.name.bold().underline(), time.dimmed())
                     } else {
@@ -238,7 +249,7 @@ fn list_entities(repository: &Repository, list_versions: bool) -> Result<String,
                 length = max_name_length - module_str.len()
             ));
             if list_versions {
-                let version_name = module.current_version.name.to_string();
+                let version_name = module.current_version.to_owned().map(|v| v.name);
                 let versions: Vec<String> = module
                     .list_versions()
                     .iter()
@@ -246,6 +257,7 @@ fn list_entities(repository: &Repository, list_versions: bool) -> Result<String,
                         let path = get_version_object_file_path(version);
                         let modified = path.metadata().unwrap().modified().unwrap();
                         let time = formatted_systemtime(&modified);
+                        let version_name = version_name.to_owned().unwrap_or_default();
                         if version.name == version_name {
                             format!("  {} ({})", version.name.bold().underline(), time.dimmed())
                         } else {

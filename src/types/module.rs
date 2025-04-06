@@ -14,7 +14,7 @@ pub struct Module {
     pub name: String,
     pub directory: String,
     pub versions: Vec<Version>,
-    pub current_version: Version,
+    pub current_version: Option<Version>,
 }
 
 impl Module {
@@ -25,7 +25,7 @@ impl Module {
     pub fn add_version(&mut self, name: &str) -> Result<Version, VersionsError> {
         let new_version = Version {
             name: name.to_string(),
-            module: ModulePtr::create(&self),
+            module: ModulePtr::create(self),
         };
         let already_exists = self.versions.has(&new_version);
         if already_exists {
@@ -67,17 +67,29 @@ impl Module {
     pub fn select_version(&mut self, name: &str) -> Result<Version, VersionsError> {
         let version = self.versions.iter().find(|version| version.name == name);
         if let Some(version) = version {
-            self.current_version.save()?;
-            self.current_version = version.to_owned();
-            self.current_version.load()?;
-            update_module_in_config(&from_path(&self.repository_ptr.repository_path), &self)?;
+            if let Some(current_version) = &self.current_version {
+                current_version.save()?;
+            }
+            self.current_version = Some(version.to_owned());
+            version.load()?;
+            update_module_in_config(&from_path(&self.repository_ptr.repository_path), self)?;
             Ok(version.to_owned())
         } else {
             Err(VersionsError::VersionDoesNotExists(name.to_string()))
         }
     }
 
-    pub fn current_version(&self) -> Result<Version, VersionsError> {
+    pub fn current_version(&self) -> Result<Option<Version>, VersionsError> {
         Ok(self.current_version.to_owned())
+    }
+
+    pub fn force_current_version(&self) -> Result<Version, VersionsError> {
+        if let Some(current_version) = &self.current_version {
+            Ok(current_version.to_owned())
+        } else {
+            Err(VersionsError::NoCurrentVersionInModule(
+                self.name.to_string(),
+            ))
+        }
     }
 }

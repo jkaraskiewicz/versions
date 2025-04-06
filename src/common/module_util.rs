@@ -30,7 +30,7 @@ pub fn create_default(repository: &Repository, name: &str, dir_path: &Path) -> M
         name: name.to_string(),
         directory: dir_path.file_name().unwrap().to_str().unwrap().to_string(),
         versions: vec![version.to_owned()],
-        current_version: version.to_owned(),
+        current_version: Some(version.to_owned()),
     };
     result
 }

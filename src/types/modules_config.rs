@@ -75,14 +75,14 @@ fn append_metadata_to_config(
         .iter()
         .map(|module| Module {
             repository_ptr: RepositoryPtr::create(repository),
-            current_version: Version {
-                name: module.current_version.name.to_string(),
+            current_version: module.current_version.to_owned().map(|version| Version {
+                name: version.name.to_string(),
                 module: ModulePtr {
                     repository_path: repository.root_path.to_path_buf(),
                     module_name: module.name.to_string(),
                     module_dir: module.directory.to_string(),
                 },
-            },
+            }),
             versions: module
                 .versions
                 .iter()
