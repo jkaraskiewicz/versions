@@ -81,7 +81,11 @@ impl VersionsCli {
             repository.root_path.to_str().unwrap().dimmed()
         );
         let entities = list_entities(&repository, true)?;
-        Ok(format!("{}\n{}", repository_str, entities))
+        if !entities.is_empty() {
+            Ok(format!("{}\n{}", repository_str, entities))
+        } else {
+            Ok(repository_str.to_string())
+        }
     }
 
     pub fn module(&self, module_command: &ModuleCommand) -> Result<String, VersionsError> {
