@@ -81,9 +81,7 @@ impl Module {
                 current_version.save()?;
             }
             self.current_version = Some(version.to_owned());
-            println!("Here1");
             version.load()?;
-            println!("Here2");
             update_module_in_config(&from_path(&self.repository_ptr.repository_path), self)?;
             Ok(version.to_owned())
         } else {
