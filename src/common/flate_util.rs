@@ -27,6 +27,8 @@ pub fn deflate_directory<P: AsRef<Path>>(
     output_directory_path: P,
 ) -> Result<(), VersionsError> {
     let decompressed_data = deflate_to_string(input_file_path)?;
+    println!("decompressed = {}", decompressed_data);
+    println!("path = {:?}", output_directory_path.as_ref());
     stream_util::destream_dir(&decompressed_data, output_directory_path.as_ref())?;
     Ok(())
 }

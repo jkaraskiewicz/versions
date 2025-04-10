@@ -42,7 +42,9 @@ pub fn destream_dir(content: &str, target_dir_path: &Path) -> Result<(), Version
             }
             StreamEntryType::File => {
                 let content = entry.content.unwrap();
+                println!("About to write to: {:?}", new_path);
                 write_file(new_path, &content)?;
+                println!("Wrote");
             }
         }
     }
