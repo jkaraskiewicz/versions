@@ -73,7 +73,7 @@ impl VersionsCli {
         }
     }
 
-    pub fn state(&self) -> Result<String, VersionsError> {
+    pub fn show(&self) -> Result<String, VersionsError> {
         let current_dir = env::current_dir()?;
         let repository = open(&current_dir, true)?;
         let repository_str = format!(

@@ -28,7 +28,7 @@ pub enum Command {
         version_command: VersionCommand,
     },
     /// Show repository state (modules, versions)
-    State,
+    Show,
     /// Generate shell completions
     Completions,
 }
