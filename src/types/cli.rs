@@ -57,6 +57,8 @@ pub enum ModuleCommand {
         #[arg()]
         name: String,
     },
+    /// Deselect current module
+    Deselect,
     /// List modules
     List,
     /// Current module
@@ -84,6 +86,8 @@ pub enum VersionCommand {
         #[arg()]
         name: String,
     },
+    /// Deselect version
+    Deselect,
     /// List versions
     List,
     /// Current version

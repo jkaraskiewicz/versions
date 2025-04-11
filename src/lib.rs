@@ -126,9 +126,13 @@ fn process_module_command(module_command: &ModuleCommand) -> Result<String, Vers
             }
         }
         ModuleCommand::Select { name } => {
-            let module = repository.get_module(name)?;
+            let module = Some(repository.get_module(name)?);
             repository.select_module(&module)?;
             Ok(format!("Module {} selected.", name.bold().underline()))
+        }
+        ModuleCommand::Deselect => {
+            repository.select_module(&None)?;
+            Ok("Module deselected.".to_string())
         }
     }
 }
@@ -157,6 +161,10 @@ fn process_version_command(
         VersionCommand::Select { name } => {
             let _ = repository.get_module(&module_name)?.select_version(name)?;
             Ok(format!("Version {} selected.", name.bold().underline()))
+        }
+        VersionCommand::Deselect => {
+            repository.get_module(&module_name)?.deselect_version()?;
+            Ok("Current version deselected.".to_string())
         }
         VersionCommand::Current => {
             let version_name = repository

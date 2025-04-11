@@ -89,6 +89,15 @@ impl Module {
         }
     }
 
+    pub fn deselect_version(&mut self) -> Result<(), VersionsError> {
+        if let Some(current_version) = &self.current_version {
+            current_version.save()?;
+            self.current_version = None;
+            update_module_in_config(&from_path(&self.repository_ptr.repository_path), self)?;
+        };
+        Ok(())
+    }
+
     pub fn current_version(&self) -> Result<Option<Version>, VersionsError> {
         Ok(self.current_version.to_owned())
     }

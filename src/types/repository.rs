@@ -48,9 +48,9 @@ impl Repository {
         Ok(new_module)
     }
 
-    pub fn select_module(&self, module: &Module) -> Result<Module, VersionsError> {
+    pub fn select_module(&self, module: &Option<Module>) -> Result<Option<Module>, VersionsError> {
         update_modules_config(self, |mut config| {
-            config.current_module = Some(module.to_owned());
+            config.current_module = module.to_owned();
             config
         })?;
         Ok(module.to_owned())
