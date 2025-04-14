@@ -1,5 +1,6 @@
 use super::errors::VersionsError;
-use commons::utils::file_util::{read_file, write_file};
+use base64::{prelude::BASE64_STANDARD, Engine};
+use commons::utils::file_util::{read_binary_file, write_binary_file};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::create_dir_all,
@@ -14,8 +15,9 @@ pub fn stream_dir(dir_path: &Path) -> Result<String, VersionsError> {
         let content = if entry.path().is_dir() {
             None
         } else {
-            let file_content = read_file(entry.path())?;
-            Some(file_content)
+            let file_content = read_binary_file(entry.path())?;
+            let based_file_content = BASE64_STANDARD.encode(file_content);
+            Some(based_file_content)
         };
         let stream_entry = StreamEntry::create(
             StreamEntryType::for_path(entry.path()),
@@ -42,7 +44,8 @@ pub fn destream_dir(content: &str, target_dir_path: &Path) -> Result<(), Version
             }
             StreamEntryType::File => {
                 let content = entry.content.unwrap();
-                write_file(new_path, &content)?;
+                let unbased_content = BASE64_STANDARD.decode(&content)?;
+                write_binary_file(new_path, &unbased_content)?;
             }
         }
     }

@@ -1,5 +1,6 @@
 use std::{io, path::StripPrefixError};
 
+use base64::DecodeError;
 use thiserror::Error;
 use toml::{de, ser};
 
@@ -39,4 +40,6 @@ pub enum VersionsError {
     VersionNotSaved(String),
     #[error("Path processing error: `{0}`")]
     PathProcessingError(#[from] StripPrefixError),
+    #[error("Base decode error: `{0}`")]
+    BaseDecodeError(#[from] DecodeError),
 }

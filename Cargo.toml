@@ -1,10 +1,10 @@
 [package]
 name = "versions"
-version = "0.2.7"
+version = "0.2.8"
 edition = "2021"
 
 [dependencies]
-commons = { git = "https://github.com/jkaraskiewicz/commons.git", version = "0.2.5" }
+commons = { git = "https://github.com/jkaraskiewicz/commons.git", version = "0.2.6" }
 clap = { version = "4.5.29", features = ["derive", "string"] }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_yml = "0.0.12"
@@ -15,3 +15,4 @@ flate2 = "1.1.1"
 thiserror = "2.0.12"
 toml = "0.8.20"
 walkdir = "2.5.0"
+base64 = "0.22.1"
